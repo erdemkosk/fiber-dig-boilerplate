@@ -43,8 +43,7 @@ func Load() {
 
 	}
 
-	container.
-		val := container.Invoke(server.NewServer)
+	val := container.Invoke(server.NewServer)
 
 	if val != nil {
 		log.Fatalf(val.Error())
