@@ -30,7 +30,14 @@ func NewFooController(deps FooControllerDependencies) *FooController {
 func (controller *FooController) GetFoo(c *fiber.Ctx) error {
 	id := c.Params("id")
 
-	foo := controller.fooService.GetFoo(id)
+	foo, err := controller.fooService.GetFoo(id)
+
+	if err != nil {
+		return c.JSON(fiber.Map{
+			"success": false,
+			"foo":     nil,
+		})
+	}
 
 	return c.JSON(fiber.Map{
 		"success": true,

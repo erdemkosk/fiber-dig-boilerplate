@@ -7,8 +7,9 @@ import (
 )
 
 type Env struct {
-	AppEnv string `mapstructure:"APP_ENV"`
-	Port   int    `mapstructure:"PORT"`
+	AppEnv     string `mapstructure:"APP_ENV"`
+	Port       int    `mapstructure:"PORT"`
+	MongoDbUrl string `mapstructure:"MONGO_DB_URL"`
 }
 
 func LoadEnv() *Env {
