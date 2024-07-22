@@ -12,21 +12,21 @@ import (
 type Dependency struct {
 	Constructor interface{}
 	Interface   interface{}
-	Token       string
+	Name        string
 }
 
-func Load() {
+func Init() {
 	container := dig.New()
 	deps := []Dependency{
 		{
 			Constructor: services.NewFooService,
 			Interface:   new(services.IFooService),
-			Token:       "FooService",
+			Name:        "FooService",
 		},
 		{
 			Constructor: controllers.NewFooController,
 			Interface:   new(controllers.IFooController),
-			Token:       "FooController",
+			Name:        "FooController",
 		},
 	}
 
@@ -34,19 +34,18 @@ func Load() {
 		err := container.Provide(
 			dep.Constructor,
 			dig.As(dep.Interface),
-			dig.Name(dep.Token),
+			dig.Name(dep.Name),
 		)
 
 		if err != nil {
 			log.Fatalf(err.Error())
 		}
-
 	}
 
-	val := container.Invoke(server.NewServer)
+	err := container.Invoke(server.NewServer)
 
-	if val != nil {
-		log.Fatalf(val.Error())
+	if err != nil {
+		panic(err.Error())
 	}
 
 }

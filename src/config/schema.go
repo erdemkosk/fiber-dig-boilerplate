@@ -11,7 +11,7 @@ type Env struct {
 	Port   int    `mapstructure:"PORT"`
 }
 
-func NewEnv() *Env {
+func LoadEnv() *Env {
 	env := Env{}
 	viper.SetConfigFile(".env")
 

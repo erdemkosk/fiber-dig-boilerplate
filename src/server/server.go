@@ -15,40 +15,48 @@ import (
 )
 
 type Server struct {
+	app *fiber.App
+
 	fooController controllers.IFooController
 }
 
 type ServerDependencies struct {
 	dig.In
+
 	FooController controllers.IFooController `name:"FooController"`
 }
 
 func NewServer(deps ServerDependencies) {
-	app := Server{
+	server := &Server{
+		app: fiber.New(),
+
 		fooController: deps.FooController,
 	}
 
-	envs := config.NewEnv()
+	envs := config.LoadEnv()
 
-	api := fiber.New()
+	bindRoutes(*server)
 
-	// signal channel to capture system calls
+	gracefulShutdown(*&server.app)
+
+	server.app.Listen(fmt.Sprintf(":%d", envs.Port))
+
+}
+
+func bindRoutes(server Server) {
+	routes.HealthRoute(server.app)
+	routes.SwaggerRoute(server.app)
+	routes.FooRoute(server.app, server.fooController)
+	routes.NotFoundRoute(server.app)
+}
+
+func gracefulShutdown(app *fiber.App) {
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 
-	// start shutdown goroutine
 	go func() {
-		// capture sigterm and other system call here
 		<-sigCh
 		log.Info("Shutting down server...")
-		_ = api.Shutdown()
+		_ = app.Shutdown()
 	}()
-
-	routes.GeneralRoute(api)
-	routes.SwaggerRoute(api)
-	routes.FooRoute(api, app.fooController)
-	routes.NotFoundRoute(api)
-
-	api.Listen(fmt.Sprintf(":%d", envs.Port))
-
 }
